@@ -17,8 +17,6 @@ typedef struct {
     int spi_sck_io;             /* SCK GPIO pin */
     int spi_ss_io;              /* SS GPIO pin */
     int clk_freq;               /* SPI clock frequency */
-
-    bool bus_is_init;           /* true if bus initialized */
 } rc522_config_t;
 
 enum {

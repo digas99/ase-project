@@ -1,5 +1,9 @@
+
 #include <stdio.h>
 #include "leds_utils.c"
+#include <esp_log.h>
+#include <inttypes.h>
+#include "rc522.h"
 
 #define SPI_MASTER_HOST SPI3_HOST
 
@@ -19,25 +23,38 @@ void turn_off_led(uint8_t);
 TaskHandle_t green_led_task_handle = NULL;
 TaskHandle_t red_led_task_handle = NULL;
 
+static const char* TAG = "rc522-demo";
+static rc522_handle_t scanner;
+
+static void rc522_handler(void* arg, esp_event_base_t base, int32_t event_id, void* event_data)
+{
+    rc522_event_data_t* data = (rc522_event_data_t*) event_data;
+
+    switch(event_id) {
+        case RC522_EVENT_TAG_SCANNED: {
+                rc522_tag_t* tag = (rc522_tag_t*) data->ptr;
+                ESP_LOGI(TAG, "Tag scanned (sn: %" PRIu64 ")", tag->serial_number);
+                green_on();
+                vTaskDelay(1000 / portTICK_PERIOD_MS);
+                green_off();
+            }
+            break;
+    }
+}
+
 void app_main(void)
 {
-    uint8_t led_flag = 0;
-    while (1)
-    {
-        if (led_flag == 0) {
-            green_off();
-            vTaskDelay(100 / portTICK_PERIOD_MS);  // Delay to ensure previous LED is turned off
-            red_on();
-        } else {
-            red_off();
-            vTaskDelay(100 / portTICK_PERIOD_MS);  // Delay to ensure previous LED is turned off
-            green_on();
-        }
+    rc522_config_t config = {
+        .spi_host = VSPI_HOST,
+        .spi_miso_io = PIN_SPI_MISO,
+        .spi_mosi_io = PIN_SPI_MOSI,
+        .spi_sck_io = PIN_SPI_CLK,
+        .spi_ss_gpio = PIN_SPI_CS,
+    };
 
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-        led_flag = !led_flag;
-    }
-    
+    rc522_create(&config, &scanner);
+    rc522_register_events(scanner, RC522_EVENT_ANY, rc522_handler, NULL);
+    rc522_start(scanner);
 }
 
 void turn_on_led(uint8_t led_gpio_pin) {
