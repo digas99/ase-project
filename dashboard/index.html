@@ -28,13 +28,15 @@
 <body>
     <h1>RFID access log</h1>
 
+    <div id="log"></div>
+
     <script>
         setInterval(function () {
             // TODO: Change the URL to the real ESP32 ip address
-            fetch('https://jsonplaceholder.typicode.com/todos/' + (Math.floor(Math.random() * 100) + 1))
+            fetch("https://jsonplaceholder.typicode.com/todos/" + (Math.floor(Math.random() * 100) + 1))
                 .then(response => response.json())
                 .then(json => {
-                    document.body.innerHTML += `<p class="${json.completed}">[${new Date().toLocaleString().replace(", ", " ")}] : Access ${json.completed ? "granted" : "denied"} (card number ${Math.floor(Math.random() * 10000000)})</p>`;
+                    document.querySelector("#log").innerHTML = `<p class="${json.completed}">[${new Date().toLocaleString().replace(", ", " ")}] : Access ${json.completed ? "granted" : "denied"} (card number ${Math.floor(Math.random() * 10000000)})</p>` + document.querySelector("#log").innerHTML;
                 })
         }, 2000);
     </script>
