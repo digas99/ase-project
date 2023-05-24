@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard | ASE Project</title>
     <style>
-        html{
+        html {
             color-scheme: light dark;
         }
 
@@ -26,17 +26,17 @@
 </head>
 
 <body>
-    <h1>Door access log</h1>
+    <h1>RFID access log</h1>
 
     <script>
         setInterval(function () {
             // TODO: Change the URL to the real ESP32 ip address
-            fetch('https://jsonplaceholder.typicode.com/todos/' + (Math.floor(Math.random() * 100) + 1) )
+            fetch('https://jsonplaceholder.typicode.com/todos/' + (Math.floor(Math.random() * 100) + 1))
                 .then(response => response.json())
                 .then(json => {
-                    document.body.innerHTML += `<p class="${json.completed}">[${new Date().toLocaleString()}] : ${json.title}</p>`
+                    document.body.innerHTML += `<p class="${json.completed}">[${new Date().toLocaleString().replace(", ", " ")}] : Access ${json.completed ? "granted" : "denied"} (card number ${Math.floor(Math.random() * 10000000)})</p>`;
                 })
-        }, 5000);
+        }, 2000);
     </script>
 </body>
 
