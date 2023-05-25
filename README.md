@@ -1,6 +1,7 @@
 # ase-project
 
 RFID card reader using a RC522 and an ESP32 microcontroller.  
+The card accesses are displayed on a dashboard and the data is stored on a database.  
 Project for the subject Arquitetura para Sistemas Embutidos (Embedded Systems Architecture).
 
 ## Requirements
@@ -13,11 +14,14 @@ Project for the subject Arquitetura para Sistemas Embutidos (Embedded Systems Ar
 
 ## Setup
 
+### ESP32
+
 The setup of the project can be make made using the Espressif IDF VSCode extension by clicking on ESP-IDF Build, Flash and Monitor buttons.
 
 To setup using the terminal, either using ESP-IDF Power Shell or a terminal with the ESP-IDF environment variables set, run the following commands:
 
 ```bash
+cd esp32
 idf.py build                # Build the project
 idf.py -p <port> flash      # Flash the project to the microcontroller
 idf.py -p <port> monitor    # Monitor the serial output
