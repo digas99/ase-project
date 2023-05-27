@@ -52,7 +52,7 @@ void app_main(void)
         .spi_ss_gpio = PIN_SPI_CS,
     };
 
-    rc522_create(&config, &scanner);
+    rc522_init(&config, &scanner);
     rc522_register_events(scanner, RC522_EVENT_ANY, rc522_handler, NULL);
     rc522_start(scanner);
 }
