@@ -80,7 +80,7 @@ static esp_err_t rc522_write(spi_device_handle_t spi_handle, uint8_t address, ui
 
     // format address byte
     // MFRC522 datasheet, Section 8.1.2.3 SPI address byte
-    // bit 7: 0 = write, 1 = read; byte 0 is always 0
+    // bit 7: 0 = write, 1 = read; bit 0 is always 0
     // 0x7E = 0111 1110
     buffer[0] = (address << 1) & 0x7E;
 
@@ -109,7 +109,7 @@ static esp_err_t rc522_read(spi_device_handle_t spi_handle, uint8_t address, uin
 
     // format address byte
     // MFRC522 datasheet, Section 8.1.2.3 SPI address byte
-    // bit 7: 0 = write, 1 = read; byte 0 is always 0
+    // bit 7: 0 = write, 1 = read; bit 0 is always 0
     // 0x7E = 0111 1110; 0x80 = 1000 0000
     buffer[0] = (address << 1) & 0x7E | 0x80;
 

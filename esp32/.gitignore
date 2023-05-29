@@ -56,3 +56,4 @@ managed_components/
 .vscode/
 sdkconfig
 dependencies.lock
+main/rc522-old.*
