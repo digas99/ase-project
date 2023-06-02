@@ -1,9 +1,12 @@
 #include <stdio.h>
-#include "leds_utils.c"
 #include <esp_log.h>
 #include <inttypes.h>
+
 #include "rc522.h"
 #include "driver/gpio.h"
+#include "driver/ledc.h"
+
+#include "leds_utils.c"
 
 #define SPI_MASTER_HOST SPI3_HOST
 
@@ -16,6 +19,9 @@
 #define PIN_RED_LED 2
 
 #define PIN_BUZZER 33
+#define BUZZER_CHANNEL  LEDC_CHANNEL_0
+#define BUZZER_FREQ_HZ  2000
+#define BUZZER_RESOLUTION LEDC_TIMER_13_BIT
 
 #define red_on() turn_on_led(PIN_RED_LED)
 #define red_off() turn_off_led(PIN_RED_LED)
@@ -24,8 +30,13 @@
 
 void turn_on_led(uint8_t);
 void turn_off_led(uint8_t);
-void buzz_on(uint8_t);
-void buzz_off(uint8_t);
+
+void ledc_buzzer_init();
+void buzzer(float);
+
+bool request_access(uint64_t);
+void req_seq();
+void forb_seq();
 
 TaskHandle_t green_led_task_handle = NULL;
 TaskHandle_t red_led_task_handle = NULL;
@@ -41,13 +52,14 @@ static void rc522_handler(void* arg, esp_event_base_t base, int32_t event_id, vo
         case RC522_EVENT_TAG_SCANNED: {
                 rc522_tag_t* tag = (rc522_tag_t*) data->ptr;
                 ESP_LOGI(TAG, "Tag scanned (sn: %" PRIu64 ")", tag->serial_number);
-                green_on();
-                buzz_on(PIN_BUZZER);
                 
-                vTaskDelay(1000 / portTICK_PERIOD_MS);
-
-                buzz_off(PIN_BUZZER);
-                green_off();
+                if (request_access(tag->serial_number)) {
+                    ESP_LOGI(TAG, "Access granted");
+                }
+                else {
+                    forb_seq();
+                    ESP_LOGI(TAG, "Access denied");
+                }
             }
             break;
     }
@@ -55,6 +67,8 @@ static void rc522_handler(void* arg, esp_event_base_t base, int32_t event_id, vo
 
 void app_main(void)
 {
+    ledc_buzzer_init();
+
     rc522_config_t config = {
         .spi.host = VSPI_HOST,
         .spi.miso_gpio = PIN_SPI_MISO,
@@ -66,6 +80,39 @@ void app_main(void)
     rc522_create(&config, &scanner);
     rc522_register_events(scanner, RC522_EVENT_ANY, rc522_handler, NULL);
     rc522_start(scanner);
+}
+
+bool request_access(uint64_t serial_number) {
+    req_seq();
+    
+    // simulate request delay
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+    
+    // clear req_sec
+    green_off();
+    buzzer(0);
+
+    // simulate response
+    return serial_number == 62984291464;
+}
+
+void req_seq() {
+    green_on();
+    buzzer(1);
+}
+
+void forb_seq() {
+    red_on();
+    for (int i = 0; i < 3; i++) {
+        buzzer(0.80);
+        
+        vTaskDelay(250 / portTICK_PERIOD_MS);
+
+        buzzer(0);
+
+        vTaskDelay(250 / portTICK_PERIOD_MS);
+    }
+    red_off();
 }
 
 void turn_on_led(uint8_t led_gpio_pin) {
@@ -89,12 +136,28 @@ void turn_off_led(uint8_t led_gpio_pin) {
         vTaskDelete(green_led_task_handle);
 }
 
-void buzz_on(uint8_t buzz_gpio_pin) {
-    esp_rom_gpio_pad_select_gpio(PIN_BUZZER);
-    gpio_set_direction(PIN_BUZZER, GPIO_MODE_OUTPUT);
-    gpio_set_level(PIN_BUZZER, 1);
+void ledc_buzzer_init() {
+    // Configure the LEDC peripheral for PWM generation
+    ledc_timer_config_t ledc_timer = {
+        .duty_resolution = BUZZER_RESOLUTION,
+        .freq_hz = BUZZER_FREQ_HZ,
+        .speed_mode = LEDC_HIGH_SPEED_MODE,
+        .timer_num = LEDC_TIMER_0
+    };
+    ledc_timer_config(&ledc_timer);
+
+    ledc_channel_config_t ledc_channel = {
+        .channel = BUZZER_CHANNEL,
+        .duty = 0,
+        .gpio_num = PIN_BUZZER,
+        .speed_mode = LEDC_HIGH_SPEED_MODE,
+        .timer_sel = LEDC_TIMER_0
+    };
+    ledc_channel_config(&ledc_channel);
 }
 
-void buzz_off(uint8_t buzz_gpio_pin) {
-    gpio_set_level(PIN_BUZZER, 0);
+void buzzer(float duty_cycle) {
+    uint32_t duty = (uint32_t)((1 << BUZZER_RESOLUTION) * duty_cycle);
+    ledc_set_duty(LEDC_HIGH_SPEED_MODE, BUZZER_CHANNEL, duty);
+    ledc_update_duty(LEDC_HIGH_SPEED_MODE, BUZZER_CHANNEL);
 }
