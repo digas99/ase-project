@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include "leds_utils.c"
 #include <esp_log.h>
@@ -12,8 +11,10 @@
 #define PIN_SPI_CLK 18
 #define PIN_SPI_MOSI 23
 #define PIN_SPI_MISO 19
+
 #define PIN_GREEN_LED 4
 #define PIN_RED_LED 2
+
 #define PIN_BUZZER 33
 
 #define red_on() turn_on_led(PIN_RED_LED)
@@ -29,7 +30,7 @@ void buzz_off(uint8_t);
 TaskHandle_t green_led_task_handle = NULL;
 TaskHandle_t red_led_task_handle = NULL;
 
-static const char* TAG = "rc522-demo";
+static const char* TAG = "rc522";
 static rc522_handle_t scanner;
 
 static void rc522_handler(void* arg, esp_event_base_t base, int32_t event_id, void* event_data)
@@ -54,16 +55,6 @@ static void rc522_handler(void* arg, esp_event_base_t base, int32_t event_id, vo
 
 void app_main(void)
 {
-    /*
-    rc522_config_t config = {
-        .spi_host = VSPI_HOST,
-        .spi_miso_io = PIN_SPI_MISO,
-        .spi_mosi_io = PIN_SPI_MOSI,
-        .spi_sck_io = PIN_SPI_CLK,
-        .spi_ss_gpio = PIN_SPI_CS,
-    };
-    */
-
     rc522_config_t config = {
         .spi.host = VSPI_HOST,
         .spi.miso_gpio = PIN_SPI_MISO,
