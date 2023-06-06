@@ -21,7 +21,7 @@ async def dashboard(request: Request):
 @app.post("/add_access")
 async def add_access(card_number: str):
     with open("ACCESS", "a") as f:
-        f.write(card_number)
+        f.write(card_number + "\n")
 
     return {"message": "Access added successfully for card number " + card_number}
 
@@ -48,7 +48,7 @@ async def check_access(data: dict):
     with open("ACCESS", "r") as f:
         serial_numbers = f.readlines()
 
-    if data["sn"] in serial_numbers:
+    if data["sn"] + "\n" in serial_numbers:
         result = 1
     else:
         result = 0
