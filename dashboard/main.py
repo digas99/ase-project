@@ -43,8 +43,6 @@ async def remove_access(card_number: str):
 @app.post("/check_access")
 async def check_access(data: dict):
 
-    print(data)
-
     with open("ACCESS", "r") as f:
         serial_numbers = f.readlines()
 
@@ -58,8 +56,10 @@ async def check_access(data: dict):
     else:
         access = "denied"
 
+    timestamp = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+
     with open("LOGFILE", "a") as f:
-        f.write(f"[{datetime.datetime.now()}] : Access {access} (card number {data['sn']})\n")
+        f.write(f"[{timestamp}] : Access {access} (card number {data['sn']})\n")
     
     return result
 
