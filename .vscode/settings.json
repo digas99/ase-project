@@ -1,0 +1,5 @@
+{
+    "files.associations": {
+        "spi_25lc040a_eeprom.h": "c"
+    }
+}
