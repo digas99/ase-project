@@ -18,8 +18,6 @@
 #define WIFI_SSID "HUAWEI P smart 2019"
 #define WIFI_PASSWORD "diogocorreia99"
 
-#define MAX_HTTP_OUTPUT_BUFFER 2048
-
 typedef struct {
     bool* p_access;
     const char* url;
