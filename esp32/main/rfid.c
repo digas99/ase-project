@@ -27,7 +27,7 @@
 #define BUZZER_FREQ_HZ  2000
 #define BUZZER_RESOLUTION LEDC_TIMER_13_BIT
 
-#define API_ENDPOINT "http://192.168.43.241/check_access"
+#define API_ENDPOINT "http://192.168.43.168/check_access"
 
 #define red_on() turn_on_led(PIN_RED_LED)
 #define red_off() turn_off_led(PIN_RED_LED)
@@ -75,14 +75,10 @@ static void rc522_handler(void* arg, esp_event_base_t base, int32_t event_id, vo
 
                 ESP_LOGI(RC522_TAG, "Tag scanned (sn: %" PRIu64 ")", sn);
 
-                if (request_access(sn)) {
+                if (request_access(sn))
                     access_seq();
-                    ESP_LOGI(RC522_TAG, "Access granted");
-                }
-                else {
+                else
                     forb_seq();
-                    ESP_LOGI(RC522_TAG, "Access denied");
-                }
             
                 // store the serial number in the eeprom (black box)
                 uint8_t address = 0x00;
@@ -115,6 +111,11 @@ void app_main(void)
     /* wifi */
     init_nvs_partition();
     wifi_init();
+
+    /* read content of black box */
+    uint8_t address = 0x00;
+    uint64_t read_sn = read_sn_eeprom(spi_device, address);
+    ESP_LOGI(RC522_TAG, "Stored in the black box: %" PRIu64 "", read_sn);
 }
 
 esp_err_t rc522_init(bool attach_to_bus) {
@@ -177,37 +178,44 @@ bool request_access(uint64_t serial_number) {
     };
 
     xTaskCreate(&http_request_task, "http_request_task", 8192, (void*)&params, 5, NULL);
+    
+    // task is asynchronous, wait some time for it to finish
     vTaskDelay(500 / portTICK_PERIOD_MS);
+
+    if (access)
+        ESP_LOGI(RC522_TAG, "Access granted.");
+    else
+        ESP_LOGI(RC522_TAG, "Access denied.");
 
     return access;
 }
 
 void request_seq() {
-    buzzer(1);
+    //buzzer(1);
 
     vTaskDelay(300 / portTICK_PERIOD_MS);
 
-    buzzer(0);
+    //buzzer(0);
 }
 
 void access_seq() {
     green_on();
-    buzzer(1);
+    //buzzer(1);
 
     vTaskDelay(1000 / portTICK_PERIOD_MS);
 
     green_off();
-    buzzer(0);
+    //buzzer(0);
 }
 
 void forb_seq() {
     red_on();
     for (int i = 0; i < 3; i++) {
-        buzzer(0.80);
+        //buzzer(0.80);
         
         vTaskDelay(250 / portTICK_PERIOD_MS);
 
-        buzzer(0);
+        //buzzer(0);
 
         vTaskDelay(250 / portTICK_PERIOD_MS);
     }
@@ -220,7 +228,7 @@ void turn_on_led(uint8_t led_gpio_pin) {
     xTaskCreate(blink_led_task, "led_task", 2048, (void *)led_gpio_pin, 5, &blink_led_task_handle);
     configASSERT(blink_led_task_handle);
 
-    if (led_gpio_pin == PIN_RED_LED)
+    if (led_gpio_pin == PIN_RED_LED) 
         red_led_task_handle = blink_led_task_handle;
     
     if (led_gpio_pin == PIN_GREEN_LED)

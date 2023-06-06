@@ -64,4 +64,4 @@ async def check_access(data: dict):
     return result
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="192.168.43.241", port=80, reload=True)
+    uvicorn.run("main:app", host="10.0.2.15", port=80, reload=True)
