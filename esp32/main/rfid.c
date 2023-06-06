@@ -29,7 +29,7 @@
 
 #define WIFI_SSID "HUAWEI P smart 2019"
 #define WIFI_PASS "diogocorreia99"
-#define SERVER_IP "192.168.43.168"
+#define SERVER_IP "192.168.43.241"
 #define API_ENDPOINT "http://" SERVER_IP "/check_access"
 
 #define red_on() turn_on_led(PIN_RED_LED)
