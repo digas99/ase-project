@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 
 import datetime
 
-SERVER_IP = "10.0.2.15"
+SERVER_IP = "192.168.43.241"
 
 app = FastAPI(title="RFID Project", version="Arquiteturas para Sistemas Embutidos")
 

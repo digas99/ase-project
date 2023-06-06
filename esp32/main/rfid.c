@@ -27,7 +27,7 @@
 #define BUZZER_FREQ_HZ  2000
 #define BUZZER_RESOLUTION LEDC_TIMER_13_BIT
 
-#define SERVER_IP "192.168.43.168"
+#define SERVER_IP "192.168.43.241"
 #define API_ENDPOINT "http://" SERVER_IP "/check_access"
 
 #define red_on() turn_on_led(PIN_RED_LED)
