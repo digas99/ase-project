@@ -4,6 +4,8 @@
 
 #include "rc522.h"
 #include "esp_wifi_handle.h"
+#include "spi_25LC040A_eeprom.h"
+
 #include "driver/gpio.h"
 #include "driver/ledc.h"
 #include "nvs_flash.h"
@@ -46,6 +48,8 @@ void request_seq();
 void access_seq();
 void forb_seq();
 
+uint64_t read_sn_eeprom(spi_device_handle_t, uint8_t);
+
 TaskHandle_t green_led_task_handle = NULL;
 TaskHandle_t red_led_task_handle = NULL;
 
@@ -64,16 +68,33 @@ static void rc522_handler(void* arg, esp_event_base_t base, int32_t event_id, vo
     switch(event_id) {
         case RC522_EVENT_TAG_SCANNED: {
                 rc522_tag_t* tag = (rc522_tag_t*) data->ptr;
-                ESP_LOGI(RC522_TAG, "Tag scanned (sn: %" PRIu64 ")", tag->serial_number);
-                
-                if (request_access(tag->serial_number)) {
+                uint64_t sn = tag->serial_number;
+
+                // print the serial number as hexadecimal
+                ESP_LOG_BUFFER_HEX(RC522_TAG, &sn, sizeof(sn));
+
+                ESP_LOGI(RC522_TAG, "Tag scanned (sn: %" PRIu64 ")", sn);
+
+                if (request_access(sn)) {
                     access_seq();
                     ESP_LOGI(RC522_TAG, "Access granted");
                 }
                 else {
                     forb_seq();
                     ESP_LOGI(RC522_TAG, "Access denied");
-                    }
+                }
+            
+                // store the serial number in the eeprom (black box)
+                uint8_t address = 0x00;
+                spi_25LC040_write_enable(spi_device);
+                spi_25LC040_write_page(spi_device, address, (uint16_t*)&sn, 16);
+                spi_25LC040_write_disable(spi_device);
+                
+                vTaskDelay(100 / portTICK_PERIOD_MS);
+
+                // read the stored serial number from the eeprom (black box)
+                uint64_t read_sn = read_sn_eeprom(spi_device, address);
+                ESP_LOGI(RC522_TAG, "Stored in the black box: %" PRIu64 "", read_sn);
             }
             break;
     }
@@ -81,14 +102,19 @@ static void rc522_handler(void* arg, esp_event_base_t base, int32_t event_id, vo
 
 void app_main(void)
 {
+    /* buzzer */
     ledc_buzzer_init();
 
-    rc522_init(false);
+    /* eeprom */
+    spi_25LC040_init(VSPI_HOST, PIN_EEPROM_CS, PIN_SPI_CLK, PIN_SPI_MOSI, PIN_SPI_MISO, CLK_SPEED_HZ, &spi_device);
+    spi_25LC040_write_status(spi_device, 0x00); // disable write protection
 
-    // wifi
+    /* rc522 */
+    rc522_init(true); // true - attach to spi bus
+
+    /* wifi */
     init_nvs_partition();
     wifi_init();
-
 }
 
 esp_err_t rc522_init(bool attach_to_bus) {
@@ -125,6 +151,16 @@ esp_err_t rc522_init(bool attach_to_bus) {
     return ret;
 }
 
+uint64_t read_sn_eeprom(spi_device_handle_t spi_device, uint8_t address) {
+    uint8_t read_data;
+    uint64_t read_sn = 0;
+    for (int i = 15; i >= 0; i--) {
+        spi_25LC040_read_byte(spi_device, address + i, &read_data);
+        read_sn |= (uint64_t) read_data << (i * 8);
+    }
+    return read_sn;
+}
+
 bool request_access(uint64_t serial_number) {
     request_seq();
 
@@ -133,7 +169,7 @@ bool request_access(uint64_t serial_number) {
     char post_data[100];
     snprintf(post_data, sizeof(post_data), "{\"sn\":\"%s\"}", sn_str);
     
-    bool access;
+    bool access = false;
     HttpRequestParams params = {
         .p_access = &access,
         .url = API_ENDPOINT,
@@ -141,7 +177,7 @@ bool request_access(uint64_t serial_number) {
     };
 
     xTaskCreate(&http_request_task, "http_request_task", 8192, (void*)&params, 5, NULL);
-    vTaskDelay(450 / portTICK_PERIOD_MS);
+    vTaskDelay(500 / portTICK_PERIOD_MS);
 
     return access;
 }
