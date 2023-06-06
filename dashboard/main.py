@@ -5,6 +5,8 @@ from fastapi.templating import Jinja2Templates
 
 import datetime
 
+SERVER_IP = "10.0.2.15"
+
 app = FastAPI(title="RFID Project", version="Arquiteturas para Sistemas Embutidos")
 
 templates = Jinja2Templates(directory="templates")
@@ -64,4 +66,4 @@ async def check_access(data: dict):
     return result
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="10.0.2.15", port=80, reload=True)
+    uvicorn.run("main:app", host=SERVER_IP, port=80, reload=True)
