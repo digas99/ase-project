@@ -15,16 +15,13 @@
 #include "esp_log.h"
 #include "nvs_flash.h"
 
-#define WIFI_SSID "HUAWEI P smart 2019"
-#define WIFI_PASSWORD "diogocorreia99"
-
 typedef struct {
     bool* p_access;
     const char* url;
     const char* post_data;
 } HttpRequestParams;
 
-void wifi_init(void);
+void wifi_init(char *ssid, char *password);
 
 void http_request_task(void *pvParameters);
 

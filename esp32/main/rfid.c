@@ -27,6 +27,8 @@
 #define BUZZER_FREQ_HZ  2000
 #define BUZZER_RESOLUTION LEDC_TIMER_13_BIT
 
+#define WIFI_SSID "HUAWEI P smart 2019"
+#define WIFI_PASS "diogocorreia99"
 #define SERVER_IP "192.168.43.168"
 #define API_ENDPOINT "http://" SERVER_IP "/check_access"
 
@@ -111,7 +113,7 @@ void app_main(void)
 
     /* wifi */
     init_nvs_partition();
-    wifi_init();
+    wifi_init(WIFI_SSID, WIFI_PASS);
 
     /* read content of black box */
     uint8_t address = 0x00;
