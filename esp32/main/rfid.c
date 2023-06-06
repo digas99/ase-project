@@ -191,31 +191,31 @@ bool request_access(uint64_t serial_number) {
 }
 
 void request_seq() {
-    //buzzer(1);
+    buzzer(1);
 
     vTaskDelay(300 / portTICK_PERIOD_MS);
 
-    //buzzer(0);
+    buzzer(0);
 }
 
 void access_seq() {
     green_on();
-    //buzzer(1);
+    buzzer(1);
 
     vTaskDelay(1000 / portTICK_PERIOD_MS);
 
     green_off();
-    //buzzer(0);
+    buzzer(0);
 }
 
 void forb_seq() {
     red_on();
     for (int i = 0; i < 3; i++) {
-        //buzzer(0.80);
+        buzzer(0.80);
         
         vTaskDelay(250 / portTICK_PERIOD_MS);
 
-        //buzzer(0);
+        buzzer(0);
 
         vTaskDelay(250 / portTICK_PERIOD_MS);
     }
