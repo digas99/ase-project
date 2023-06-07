@@ -7,6 +7,13 @@ The card accesses are displayed on a dashboard and the data is stored on a text 
 The access feedback is given by a buzzer and LEDs.  
 Serving as a black box, there is a EEPROM that stores the card Serial Number of the last access.
 
+## Table of Contents
+1. [Requirements](#requirements)
+1. [Setup](#setup)
+1. [Components](#components)
+1. [Architecture](#architecture)
+1. [Authors](#authors)
+
 ## Requirements
 
 ### Hardware
@@ -78,7 +85,6 @@ python3 main.py
 - [esp-http](esp32/components/esp-http/) (implemented by us) - HTTP client
 - [esp-eeprom](esp32/components/esp-eeprom/) (implemented by us) - EEPROM driver
 
-
 ## Architecture
 
 ### Hardware
@@ -92,3 +98,10 @@ python3 main.py
 
 ### Circuit
 ![Circuit](architecture/circuit.jpg)
+
+## Authors
+
+|NMec | Name | Email|
+|-----|------|------|
+|88930 | João Tomás Borges Simões | jtsimoes@ua.pt|
+|90327 | Diogo Costa Correia | diogo.correia99@ua.pt|
