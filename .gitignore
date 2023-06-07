@@ -1,1 +1,5 @@
-.vscode
+# Python cache
+__pycache__/
+
+# VSCode workspace settings
+.vscode/
