@@ -81,5 +81,14 @@ python3 main.py
 
 ## Architecture
 
-![Architecture](architecture/architecture_diagram.jpg)
+### Hardware
+![Architecture](architecture/hardware.jpg)
+
+### Software
+![Software](architecture/software.jpg)
+
+### Communication
+![Communication](architecture/communications.jpg)
+
+### Circuit
 ![Circuit](architecture/circuit.jpg)
