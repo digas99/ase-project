@@ -24,7 +24,7 @@ Serving as a black box, there is a EEPROM that stores the card Serial Number of 
 - 1 EEPROM 25LC040A
 
 ### Software
-- Expressif IDF framework
+- Espressif IDF framework
 - Espressif IDF VSCode extension (optional)
 - ESP-IDF Power Shell (optional)
 
